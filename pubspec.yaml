@@ -1,5 +1,5 @@
-name: univ_cont
-description: A new Flutter project.
+name: flutter_samsung_remote
+description: Flutter remote controll for Samsung.
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
