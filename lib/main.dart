@@ -1,14 +1,14 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:rxdart/rxdart.dart';
-
-import 'AppColors.dart';
+import 'package:univ_cont/constants.dart';
+import 'package:univ_cont/device.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
-      SystemChrome.setEnabledSystemUIOverlays([]);
+  SystemChrome.setEnabledSystemUIOverlays([]);
   return runApp(UniversalControllerApp());
 }
 
@@ -17,8 +17,9 @@ class UniversalControllerApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Universal Controller',
+      title: 'FlutterRemote',
       home: Scaffold(
+        backgroundColor: Colors.grey.shade100,
         body: MyHomePage(),
       ),
     );
@@ -26,464 +27,744 @@ class UniversalControllerApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key}) : super(key: key);
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  BehaviorSubject<int> willAcceptStream;
-
-  Color background = AppColors.lightBackground;
-  Color text = AppColors.lightText;
-  Color select = AppColors.lightSelect;
-  Color icon = AppColors.lightIcon;
-  Color buttonBackground = AppColors.lightButtonBackground;
-  Color iconButton = AppColors.lightIconButton;
+  SamsungSmartTV tv;
+  bool _keypadShown = false;
 
   @override
   void initState() {
-    willAcceptStream = new BehaviorSubject<int>();
-    willAcceptStream.add(0);
     super.initState();
   }
 
-  void _fuctionDrag(String msg) {
-    final snackBar = SnackBar(
-        content: Text('$msg'),
-        behavior: SnackBarBehavior.floating,
-        duration: Duration(milliseconds: 500));
-    Scaffold.of(context).showSnackBar(snackBar);
+  Future<void> connectTV() async {
+    try {
+      setState(() async {
+        tv = await SamsungSmartTV.discover();
+        await tv.connect();
+      });
+    } catch (e) {
+      print(e);
+    }
+    print("this is the token to save somewere ${tv.token}");
   }
 
   @override
   Widget build(BuildContext context) {
-    var size = MediaQuery.of(context).size;
-
     return SafeArea(
       child: Container(
-        width: size.width,
-        height: size.height,
-        color: background,
-        child: FittedBox(
-          fit: BoxFit.contain,
-          alignment: Alignment.center,
-          child: Center(
-            child: Column(
+        padding: const EdgeInsets.symmetric(horizontal: 30.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: <Widget>[
-                Container(
-                  width: size.width,
-                  height: size.height * 0.1,
-                  child: Padding(
-                    padding: EdgeInsets.all(20.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        RichText(
-                          text: TextSpan(
-                            text: 'Uni',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: text,
-                              fontSize: 20,
+              children: [
+                IconButton(
+                  icon: Icon(Icons.cast, size: 30, color: Colors.black),
+                  onPressed: connectTV,
+                ),
+                IconButton(
+                  icon: Icon(Icons.dialpad, size: 30, color: _keypadShown ? Colors.blue : null),
+                  onPressed: () {
+                    setState(() {
+                      _keypadShown = !_keypadShown;
+                    });
+                  },
+                ),
+                IconButton(
+                  icon: Icon(Icons.power_settings_new, color: Colors.red, size: 30),
+                  onPressed: () async {
+                    await tv.sendKey(KEY_CODES.KEY_POWER);
+                  },
+                ),
+              ],
+            ),
+            SizedBox(height: 50),
+            Visibility(
+              visible: _keypadShown,
+              child: Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        InsetShadowContainer(
+                          width: 50,
+                          height: 50,
+                          padding: EdgeInsets.zero,
+                          child: MaterialButton(
+                            padding: EdgeInsets.zero,
+                            shape: CircleBorder(),
+                            child: Text(
+                              "1",
+                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                             ),
-                            children: <TextSpan>[
-                              TextSpan(
-                                text: 'Controller',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.normal,
-                                  color: text,
-                                  fontSize: 20,
-                                ),
-                              ),
-                            ],
+                            onPressed: () async {
+                              await tv.sendKey(KEY_CODES.KEY_1);
+                            },
                           ),
                         ),
-                        Spacer(),
-                        Icon(
-                          Icons.personal_video,
-                          color: select,
-                          size: 28,
+                        InsetShadowContainer(
+                          width: 50,
+                          height: 50,
+                          padding: EdgeInsets.zero,
+                          child: MaterialButton(
+                            padding: EdgeInsets.zero,
+                            shape: CircleBorder(),
+                            child: Text(
+                              "2",
+                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                            ),
+                            onPressed: () async {
+                              await tv.sendKey(KEY_CODES.KEY_2);
+                            },
+                          ),
                         ),
-                        Icon(
-                          Icons.keyboard_arrow_down,
-                          color: select,
-                          size: 28,
+                        InsetShadowContainer(
+                          width: 50,
+                          height: 50,
+                          padding: EdgeInsets.zero,
+                          child: MaterialButton(
+                            padding: EdgeInsets.zero,
+                            shape: CircleBorder(),
+                            child: Text(
+                              "3",
+                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                            ),
+                            onPressed: () async {
+                              await tv.sendKey(KEY_CODES.KEY_3);
+                            },
+                          ),
                         ),
                       ],
                     ),
-                  ),
-                ),
-                Container(
-                  width: size.width,
-                  height: size.height * 0.11,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: <Widget>[
-                      Container(
-                        width: size.height * 0.11,
-                        height: size.height * 0.08,
-                        child: Icon(
-                          Icons.volume_down,
-                          color: icon,
-                          size: 28,
-                        ),
-                      ),
-                      InkWell(
-                        onTap: () {
-                          setState(
-                            () {
-                              background =
-                                  background == AppColors.darkBackground
-                                      ? AppColors.lightBackground
-                                      : AppColors.darkBackground;
-                              text = text == AppColors.darkext
-                                  ? AppColors.lightText
-                                  : AppColors.darkext;
-                              select = select == AppColors.darkSelect
-                                  ? AppColors.lightSelect
-                                  : AppColors.darkSelect;
-                              icon = icon == AppColors.darkIcon
-                                  ? AppColors.lightIcon
-                                  : AppColors.darkIcon;
-                                  iconButton = iconButton == AppColors.darkIconButton
-                                  ? AppColors.lightIconButton
-                                  : AppColors.darkIconButton;
-                              buttonBackground = buttonBackground ==
-                                      AppColors.darkButtonBackground
-                                  ? AppColors.lightButtonBackground
-                                  : AppColors.darkButtonBackground;
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        InsetShadowContainer(
+                          width: 50,
+                          height: 50,
+                          padding: EdgeInsets.zero,
+                          child: MaterialButton(
+                            padding: EdgeInsets.zero,
+                            shape: CircleBorder(),
+                            child: Text(
+                              "4",
+                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                            ),
+                            onPressed: () async {
+                              await tv.sendKey(KEY_CODES.KEY_4);
                             },
-                          );
-                          print("Power Pressed");
-                        },
-                        splashColor: Colors.transparent,
-                        highlightColor: Colors.transparent,
-                        child: Container(
-                          padding: EdgeInsets.all(2),
-                          width: size.height * 0.11,
-                          height: size.height * 0.11,
-                          decoration: new BoxDecoration(
-                            color: buttonBackground,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.power_settings_new,
-                            color: Color(0xFFEF5252),
-                            size: 38,
                           ),
                         ),
-                      ),
-                      Container(
-                        width: size.height * 0.11,
-                        height: size.height * 0.08,
-                        child: Icon(
-                          Icons.filter_list,
-                          color: icon,
-                          size: 28,
+                        InsetShadowContainer(
+                          width: 50,
+                          height: 50,
+                          padding: EdgeInsets.zero,
+                          child: MaterialButton(
+                            padding: EdgeInsets.zero,
+                            shape: CircleBorder(),
+                            child: Text(
+                              "5",
+                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                            ),
+                            onPressed: () async {
+                              await tv.sendKey(KEY_CODES.KEY_5);
+                            },
+                          ),
+                        ),
+                        InsetShadowContainer(
+                          width: 50,
+                          height: 50,
+                          padding: EdgeInsets.zero,
+                          child: MaterialButton(
+                            padding: EdgeInsets.zero,
+                            shape: CircleBorder(),
+                            child: Text(
+                              "6",
+                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                            ),
+                            onPressed: () async {
+                              await tv.sendKey(KEY_CODES.KEY_6);
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        InsetShadowContainer(
+                          width: 50,
+                          height: 50,
+                          padding: EdgeInsets.zero,
+                          child: MaterialButton(
+                            padding: EdgeInsets.zero,
+                            shape: CircleBorder(),
+                            child: Text(
+                              "7",
+                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                            ),
+                            onPressed: () async {
+                              await tv.sendKey(KEY_CODES.KEY_7);
+                            },
+                          ),
+                        ),
+                        InsetShadowContainer(
+                          width: 50,
+                          height: 50,
+                          padding: EdgeInsets.zero,
+                          child: MaterialButton(
+                            padding: EdgeInsets.zero,
+                            shape: CircleBorder(),
+                            child: Text(
+                              "8",
+                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                            ),
+                            onPressed: () async {
+                              await tv.sendKey(KEY_CODES.KEY_8);
+                            },
+                          ),
+                        ),
+                        InsetShadowContainer(
+                          width: 50,
+                          height: 50,
+                          padding: EdgeInsets.zero,
+                          child: MaterialButton(
+                            padding: EdgeInsets.zero,
+                            shape: CircleBorder(),
+                            child: Text(
+                              "9",
+                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                            ),
+                            onPressed: () async {
+                              await tv.sendKey(KEY_CODES.KEY_9);
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        InsetShadowContainer(
+                          width: 50,
+                          height: 50,
+                          padding: EdgeInsets.zero,
+                          child: MaterialButton(
+                            padding: EdgeInsets.zero,
+                            shape: CircleBorder(),
+                            child: Text(
+                              "GUIDE",
+                              style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                            ),
+                            onPressed: () async {
+                              await tv.sendKey(KEY_CODES.KEY_TOOLS);
+                            },
+                          ),
+                        ),
+                        InsetShadowContainer(
+                          width: 50,
+                          height: 50,
+                          padding: EdgeInsets.zero,
+                          child: MaterialButton(
+                            padding: EdgeInsets.zero,
+                            shape: CircleBorder(),
+                            child: Text(
+                              "0",
+                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                            ),
+                            onPressed: () async {
+                              await tv.sendKey(KEY_CODES.KEY_0);
+                            },
+                          ),
+                        ),
+                        InsetShadowContainer(
+                          width: 50,
+                          height: 50,
+                          padding: EdgeInsets.zero,
+                          child: MaterialButton(
+                            padding: EdgeInsets.zero,
+                            shape: CircleBorder(),
+                            child: Text(
+                              "GUIDE",
+                              style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                            ),
+                            onPressed: () async {
+                              await tv.sendKey(KEY_CODES.KEY_GUIDE);
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Visibility(
+              visible: !_keypadShown,
+              child: Expanded(
+                child: Stack(
+                  children: [
+                    Align(
+                      alignment: Alignment.topLeft,
+                      child: InsetShadowContainer(
+                        width: 50,
+                        height: 50,
+                        padding: EdgeInsets.zero,
+                        child: MaterialButton(
+                          padding: EdgeInsets.zero,
+                          shape: CircleBorder(),
+                          child: Text(
+                            "SMART",
+                            style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                          ),
+                          onPressed: () async {
+                            await tv.sendKey(KEY_CODES.KEY_HOME);
+                          },
                         ),
                       ),
-                    ],
+                    ),
+                    Align(
+                      alignment: Alignment.topRight,
+                      child: InsetShadowContainer(
+                        width: 50,
+                        height: 50,
+                        padding: EdgeInsets.zero,
+                        child: MaterialButton(
+                          padding: EdgeInsets.zero,
+                          shape: CircleBorder(),
+                          child: Text(
+                            "INPUT",
+                            style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                          ),
+                          onPressed: () async {
+                            await tv.sendKey(KEY_CODES.KEY_SOURCE);
+                          },
+                        ),
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment.bottomLeft,
+                      child: InsetShadowContainer(
+                        width: 50,
+                        height: 50,
+                        padding: EdgeInsets.zero,
+                        child: MaterialButton(
+                          padding: EdgeInsets.zero,
+                          shape: CircleBorder(),
+                          child: Text(
+                            "BACK",
+                            style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                          ),
+                          onPressed: () async {
+                            await tv.sendKey(KEY_CODES.KEY_RETURN);
+                          },
+                        ),
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment.bottomRight,
+                      child: InsetShadowContainer(
+                        width: 50,
+                        height: 50,
+                        padding: EdgeInsets.zero,
+                        child: MaterialButton(
+                          padding: EdgeInsets.zero,
+                          shape: CircleBorder(),
+                          child: Text(
+                            "EXIT",
+                            style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                          ),
+                          onPressed: () async {
+                            await tv.sendKey(KEY_CODES.KEY_EXT41);
+                          },
+                        ),
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment.center,
+                      child: InsetShadowContainer(
+                        width: 60,
+                        height: 60,
+                        padding: EdgeInsets.zero,
+                        child: MaterialButton(
+                          padding: EdgeInsets.zero,
+                          shape: CircleBorder(),
+                          child: Text(
+                            "OK",
+                            style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                          ),
+                          onPressed: () async {
+                            await tv.sendKey(KEY_CODES.KEY_ENTER);
+                          },
+                        ),
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment(0, -0.6),
+                      child: InsetShadowContainer(
+                        width: 60,
+                        height: 60,
+                        padding: EdgeInsets.zero,
+                        child: MaterialButton(
+                          padding: EdgeInsets.zero,
+                          shape: CircleBorder(),
+                          child: Icon(Icons.arrow_drop_up, size: 30),
+                          onPressed: () async {
+                            await tv.sendKey(KEY_CODES.KEY_UP);
+                          },
+                        ),
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment(0, 0.6),
+                      child: InsetShadowContainer(
+                        width: 60,
+                        height: 60,
+                        padding: EdgeInsets.zero,
+                        child: MaterialButton(
+                          padding: EdgeInsets.zero,
+                          shape: CircleBorder(),
+                          child: Icon(Icons.arrow_drop_down, size: 30),
+                          onPressed: () async {
+                            await tv.sendKey(KEY_CODES.KEY_DOWN);
+                          },
+                        ),
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment(0.6, 0),
+                      child: InsetShadowContainer(
+                        width: 60,
+                        height: 60,
+                        padding: EdgeInsets.zero,
+                        child: MaterialButton(
+                          padding: EdgeInsets.zero,
+                          shape: CircleBorder(),
+                          child: Icon(Icons.arrow_right, size: 30),
+                          onPressed: () async {
+                            await tv.sendKey(KEY_CODES.KEY_RIGHT);
+                          },
+                        ),
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment(-0.6, 0),
+                      child: InsetShadowContainer(
+                        width: 60,
+                        height: 60,
+                        padding: EdgeInsets.zero,
+                        child: MaterialButton(
+                          padding: EdgeInsets.zero,
+                          shape: CircleBorder(),
+                          child: Icon(Icons.arrow_left, size: 30),
+                          onPressed: () async {
+                            await tv.sendKey(KEY_CODES.KEY_LEFT);
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(height: 50),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                InsetShadowContainer(
+                  width: 30,
+                  height: 30,
+                  padding: EdgeInsets.all(3),
+                  child: MaterialButton(
+                    padding: EdgeInsets.zero,
+                    color: Colors.red,
+                    shape: CircleBorder(),
+                    onPressed: () async {
+                      await tv.sendKey(KEY_CODES.KEY_RED);
+                    },
                   ),
                 ),
-                Container(
-                  width: size.width,
-                  height: size.height * 0.25,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: <Widget>[
-                      Container(
-                        width: size.width * 0.20,
-                        height: size.height * 0.25,
-                        decoration: new BoxDecoration(
-                          color: buttonBackground,
-                          borderRadius: new BorderRadius.all(
-                            Radius.circular(40.0),
-                          ),
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: <Widget>[
-                            Icon(
-                              Icons.add,
-                              color: iconButton,
-                              size: 38,
-                            ),
-                            Text(
-                              "Vol",
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: text,
-                                fontSize: 24,
-                              ),
-                            ),
-                            Icon(
-                              Icons.remove,
-                              color: iconButton,
-                              size: 38,
-                            ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(2),
-                        width: size.width * 0.1,
-                        height: size.width * 0.1,
-                        decoration: new BoxDecoration(
-                          gradient: new LinearGradient(
-                            begin: Alignment.centerLeft,
-                            end: Alignment.centerRight,
-                            colors: [
-                              Colors.blue,
-                              Colors.pink,
-                            ],
-                          ),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Container(
-                          padding: EdgeInsets.all(18),
-                          width: size.width * 0.4,
-                          height: size.width * 0.4,
-                          decoration: new BoxDecoration(
-                            color: background,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                      ),
-                      Container(
-                        width: size.width * 0.20,
-                        height: size.height * 0.25,
-                        decoration: new BoxDecoration(
-                          color: buttonBackground,
-                          borderRadius: new BorderRadius.all(
-                            Radius.circular(40.0),
-                          ),
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: <Widget>[
-                            Icon(
-                              Icons.keyboard_arrow_up,
-                              color: iconButton,
-                              size: 38,
-                            ),
-                            Text(
-                              "Ch",
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: text,
-                                fontSize: 24,
-                              ),
-                            ),
-                            Icon(
-                              Icons.keyboard_arrow_down,
-                              color: iconButton,
-                              size: 38,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                InsetShadowContainer(
+                  width: 30,
+                  height: 30,
+                  padding: EdgeInsets.all(3),
+                  child: MaterialButton(
+                    padding: EdgeInsets.zero,
+                    color: Colors.green,
+                    shape: CircleBorder(),
+                    onPressed: () async {
+                      await tv.sendKey(KEY_CODES.KEY_GREEN);
+                    },
                   ),
                 ),
-                Container(
-                  width: size.width,
-                  height: size.height * 0.10,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Icon(
-                        Icons.lens,
-                        color: icon,
-                        size: 8,
-                      ),
-                      Container(
-                        width: 8,
-                      ),
-                      Icon(
-                        Icons.lens,
-                        color: icon,
-                        size: 8,
-                      ),
-                      Container(
-                        width: 8,
-                      ),
-                      Icon(
-                        Icons.lens,
-                        color: icon,
-                        size: 8,
-                      ),
-                    ],
+                InsetShadowContainer(
+                  width: 30,
+                  height: 30,
+                  padding: EdgeInsets.all(3),
+                  child: MaterialButton(
+                    padding: EdgeInsets.zero,
+                    color: Colors.yellow,
+                    shape: CircleBorder(),
+                    onPressed: () async {
+                      await tv.sendKey(KEY_CODES.KEY_YELLOW);
+                    },
                   ),
                 ),
-                Container(
-                  width: size.width,
-                  height: size.height * 0.23,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: <Widget>[
-                      DragTarget(
-                        builder: (context, list, list2) {
-                          return Container(
-                            padding: EdgeInsets.all(3),
-                            width: size.width * 0.2,
-                            height: size.width * 0.5,
-                            child: Icon(
-                              Icons.lens,
-                              color: Color(0xFFFF4B4D),
-                              size: 18,
-                            ),
-                          );
-                        },
-                        onWillAccept: (item) {
-                          debugPrint('<================');
-                          this.willAcceptStream.add(-50);
-                          _fuctionDrag("<================");
-                          return false;
-                        },
-                        onLeave: (item) {
-                          debugPrint('RESET');
-                          this.willAcceptStream.add(0);
-                        },
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(2.5),
-                        width: size.width * 0.5,
-                        height: size.width * 0.5,
-                        decoration: new BoxDecoration(
-                          gradient: new LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              Colors.transparent,
-                              Colors.transparent,
-                              Colors.pinkAccent,
-                              Colors.blue,
-                              Color(0xFF584BD2)
-                            ],
-                          ),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Container(
-                          padding: EdgeInsets.all(18),
-                          width: size.width * 0.4,
-                          height: size.width * 0.4,
-                          decoration: new BoxDecoration(
-                            color: background,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Draggable(
-                            axis: Axis.horizontal,
-                            feedback: StreamBuilder(
-                              initialData: 0,
-                              stream: willAcceptStream,
-                              builder: (context, snapshot) {
-                                return Container(
-                                  width: size.width * 0.4,
-                                  height: size.width * 0.4,
-                                  decoration: new BoxDecoration(
-                                    color: (snapshot.data) > 0
-                                        ? Color(0xFF59C533)
-                                        : (snapshot.data) == 0
-                                            ? buttonBackground
-                                            : Color(0xFFFF4B4D),
-                                    shape: BoxShape.circle,
-                                  ),
-                                );
-                              },
-                            ),
-                            childWhenDragging: Container(),
-                            child: Container(
-                              width: size.width * 0.4,
-                              height: size.width * 0.4,
-                              decoration: new BoxDecoration(
-                                color: buttonBackground,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                            onDraggableCanceled: (v, f) => setState(
-                              () {
-                                this.willAcceptStream.add(0);
-                              },
-                            ),
-                          ),
-                        ),
-                      ),
-                      DragTarget(
-                        builder: (context, list, list2) {
-                          return Container(
-                            padding: EdgeInsets.all(3),
-                            width: size.width * 0.2,
-                            height: size.width * 0.5,
-                            child: Icon(
-                              Icons.lens,
-                              color: Color(0xFF59C533),
-                              size: 18,
-                            ),
-                          );
-                        },
-                        onWillAccept: (item) {
-                          debugPrint('================>');
-                          this.willAcceptStream.add(50);
-                          _fuctionDrag("================>");
-                          return false;
-                        },
-                        onLeave: (item) {
-                          debugPrint('RESET');
-                          this.willAcceptStream.add(0);
-                        },
-                      ),
-                    ],
+                InsetShadowContainer(
+                  width: 30,
+                  height: 30,
+                  padding: EdgeInsets.all(3),
+                  child: MaterialButton(
+                    padding: EdgeInsets.zero,
+                    color: Colors.blue,
+                    shape: CircleBorder(),
+                    onPressed: () async {
+                      await tv.sendKey(KEY_CODES.KEY_CYAN);
+                    },
                   ),
                 ),
-                Container(
-                  width: size.width,
-                  height: size.height * 0.20,
+              ],
+            ),
+            SizedBox(height: 50),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                InsetShadowContainer(
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: <Widget>[
-                      Icon(
-                        Icons.adjust,
-                        color: Color(0xFF584BD2),
+                    children: [
+                      MaterialButton(
+                        height: 50,
+                        minWidth: 50,
+                        shape: CircleBorder(),
+                        child: Icon(Icons.keyboard_arrow_up, size: 30),
+                        onPressed: () async {
+                          await tv.sendKey(KEY_CODES.KEY_VOLUP);
+                        },
                       ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: <Widget>[
-                          InkWell(
-                            onTap: () {
-                              print("Start Pressed");
-                            },
-                            splashColor: Colors.transparent,
-                            highlightColor: Colors.transparent,
-                            child: Icon(
-                              Icons.rss_feed,
-                              color: Color(0xFF584BD2),
-                            ),
+                      MaterialButton(
+                        height: 50,
+                        minWidth: 50,
+                        shape: CircleBorder(),
+                        child: Icon(Icons.volume_off),
+                        onPressed: () async {
+                          await tv.sendKey(KEY_CODES.KEY_MUTE);
+                        },
+                      ),
+                      MaterialButton(
+                        height: 50,
+                        minWidth: 50,
+                        shape: CircleBorder(),
+                        child: Icon(Icons.keyboard_arrow_down, size: 30),
+                        onPressed: () async {
+                          await tv.sendKey(KEY_CODES.KEY_VOLDOWN);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                InsetShadowContainer(
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(5.0),
+                        child: MaterialButton(
+                          height: 50,
+                          minWidth: 50,
+                          padding: EdgeInsets.zero,
+                          shape: CircleBorder(),
+                          child: Text(
+                            "MENU",
+                            style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
                           ),
-                          InkWell(
-                            onTap: () {
-                              print("Settings Pressed");
-                            },
-                            splashColor: Colors.transparent,
-                            highlightColor: Colors.transparent,
-                            child: Icon(
-                              Icons.settings,
-                              color: icon,
-                            ),
-                          ),
-                        ],
+                          onPressed: () async {
+                            await tv.sendKey(KEY_CODES.KEY_HOME);
+                          },
+                        ),
+                      ),
+                      SizedBox(height: 35),
+                      MaterialButton(
+                        height: 50,
+                        minWidth: 50,
+                        shape: CircleBorder(),
+                        child: Text(
+                          "MORE",
+                          style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                        ),
+                        onPressed: () async {
+                          await tv.sendKey(KEY_CODES.KEY_MORE);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                InsetShadowContainer(
+                  child: Column(
+                    children: [
+                      MaterialButton(
+                        height: 50,
+                        minWidth: 50,
+                        shape: CircleBorder(),
+                        child: Icon(Icons.keyboard_arrow_up, size: 30),
+                        onPressed: () async {
+                          await tv.sendKey(KEY_CODES.KEY_CHUP);
+                        },
+                      ),
+                      MaterialButton(
+                        height: 50,
+                        minWidth: 50,
+                        shape: CircleBorder(),
+                        child: Text('P', style: TextStyle(fontSize: 17, color: Colors.black)),
+                        onPressed: null,
+                      ),
+                      MaterialButton(
+                        height: 50,
+                        minWidth: 50,
+                        shape: CircleBorder(),
+                        child: Icon(Icons.keyboard_arrow_down, size: 30),
+                        onPressed: () async {
+                          await tv.sendKey(KEY_CODES.KEY_CHDOWN);
+                        },
                       ),
                     ],
                   ),
                 ),
               ],
             ),
-          ),
+            SizedBox(height: 50),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                InsetShadowContainer(
+                  width: 40,
+                  height: 40,
+                  padding: EdgeInsets.all(3),
+                  child: MaterialButton(
+                    padding: EdgeInsets.zero,
+                    shape: CircleBorder(),
+                    child: Icon(Icons.fast_rewind, size: 20),
+                    onPressed: () async {
+                      await tv.sendKey(KEY_CODES.KEY_REWIND);
+                    },
+                  ),
+                ),
+                InsetShadowContainer(
+                  width: 40,
+                  height: 40,
+                  padding: EdgeInsets.all(3),
+                  child: MaterialButton(
+                    padding: EdgeInsets.zero,
+                    shape: CircleBorder(),
+                    child: Icon(Icons.fiber_manual_record, size: 20, color: Colors.red),
+                    onPressed: () async {
+                      await tv.sendKey(KEY_CODES.KEY_REC);
+                    },
+                  ),
+                ),
+                InsetShadowContainer(
+                  width: 40,
+                  height: 40,
+                  padding: EdgeInsets.all(3),
+                  child: MaterialButton(
+                    padding: EdgeInsets.zero,
+                    shape: CircleBorder(),
+                    child: Icon(Icons.play_arrow, size: 20),
+                    onPressed: () async {
+                      await tv.sendKey(KEY_CODES.KEY_PLAY);
+                    },
+                  ),
+                ),
+                InsetShadowContainer(
+                  width: 40,
+                  height: 40,
+                  padding: EdgeInsets.all(3),
+                  child: MaterialButton(
+                    padding: EdgeInsets.zero,
+                    shape: CircleBorder(),
+                    child: Icon(Icons.stop, size: 20),
+                    onPressed: () async {
+                      await tv.sendKey(KEY_CODES.KEY_STOP);
+                    },
+                  ),
+                ),
+                InsetShadowContainer(
+                  width: 40,
+                  height: 40,
+                  padding: EdgeInsets.all(3),
+                  child: MaterialButton(
+                    padding: EdgeInsets.zero,
+                    shape: CircleBorder(),
+                    child: Icon(Icons.pause, size: 20, color: Colors.yellow),
+                    onPressed: () async {
+                      await tv.sendKey(KEY_CODES.KEY_PAUSE);
+                    },
+                  ),
+                ),
+                InsetShadowContainer(
+                  width: 40,
+                  height: 40,
+                  padding: EdgeInsets.all(3),
+                  child: MaterialButton(
+                    padding: EdgeInsets.zero,
+                    shape: CircleBorder(),
+                    child: Icon(Icons.fast_forward, size: 20),
+                    onPressed: () async {
+                      await tv.sendKey(KEY_CODES.KEY_FF);
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
+    );
+  }
+}
+
+class InsetShadowContainer extends StatelessWidget {
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+  final double width;
+  final double height;
+
+  const InsetShadowContainer({
+    Key key,
+    this.child,
+    this.padding = const EdgeInsets.symmetric(vertical: 10),
+    this.width,
+    this.height,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        // color: Colors.white,
+        border: Border.all(width: 2, color: Colors.grey.shade200),
+        borderRadius: BorderRadius.circular(30),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.shade400,
+          ),
+          BoxShadow(
+            color: Colors.white,
+            spreadRadius: -1,
+            blurRadius: 1,
+          ),
+        ],
+      ),
+      padding: padding,
+      child: child,
     );
   }
 }
