@@ -2,10 +2,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:univ_cont/constants.dart';
-import 'package:univ_cont/device.dart';
 
 import 'AppColors.dart';
+import 'constants.dart';
+import 'device.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();

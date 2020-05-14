@@ -1,6 +1,5 @@
-import 'package:univ_cont/device.dart';
-
 import 'constants.dart';
+import 'device.dart';
 
 main() async {
   // final SamsungSmartTV tv = SamsungSmartTV(host: "192.168.1.11", mac: "68:27:37:41:05:C4");
