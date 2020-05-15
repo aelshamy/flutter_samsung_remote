@@ -3,14 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rxdart/rxdart.dart';
 
-import 'AppColors.dart';
+import 'app_colors.dart';
 import 'constants.dart';
 import 'device.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  SystemChrome.setPreferredOrientations(
-      [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
   SystemChrome.setEnabledSystemUIOverlays([]);
   return runApp(UniversalControllerApp());
 }
@@ -65,10 +64,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _fuctionDrag(String msg) {
-    final snackBar = SnackBar(
-        content: Text('$msg'),
-        behavior: SnackBarBehavior.floating,
-        duration: Duration(milliseconds: 500));
+    final snackBar = SnackBar(content: Text('$msg'), behavior: SnackBarBehavior.floating, duration: Duration(milliseconds: 500));
     Scaffold.of(context).showSnackBar(snackBar);
   }
 
@@ -386,13 +382,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           gradient: new LinearGradient(
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
-                            colors: [
-                              Colors.transparent,
-                              Colors.transparent,
-                              Colors.pinkAccent,
-                              Colors.blue,
-                              Color(0xFF584BD2)
-                            ],
+                            colors: [Colors.transparent, Colors.transparent, Colors.pinkAccent, Colors.blue, Color(0xFF584BD2)],
                           ),
                           shape: BoxShape.circle,
                         ),
@@ -416,9 +406,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                   decoration: new BoxDecoration(
                                     color: (snapshot.data) > 0
                                         ? Color(0xFF59C533)
-                                        : (snapshot.data) == 0
-                                            ? buttonBackground
-                                            : Color(0xFFFF4B4D),
+                                        : (snapshot.data) == 0 ? buttonBackground : Color(0xFFFF4B4D),
                                     shape: BoxShape.circle,
                                   ),
                                 );
