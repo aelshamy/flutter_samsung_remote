@@ -2,8 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'constants.dart';
 import 'device.dart';
+import 'key_codes.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -538,13 +538,13 @@ class ControllerButton extends StatelessWidget {
           begin: Alignment.topLeft,
           colors: [Color(0XFF1c1c1c), Color(0XFF383838)],
         ),
-        boxShadow: [
-          new BoxShadow(
+        boxShadow: const [
+          BoxShadow(
             color: Color(0XFF1c1c1c),
             offset: Offset(5.0, 5.0),
             blurRadius: 10.0,
           ),
-          new BoxShadow(
+          BoxShadow(
             color: Color(0XFF404040),
             offset: Offset(-5.0, -5.0),
             blurRadius: 10.0,
@@ -557,7 +557,7 @@ class ControllerButton extends StatelessWidget {
           decoration: BoxDecoration(
             // shape: BoxShape.circle,
             borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
-            gradient: LinearGradient(begin: Alignment.topLeft, colors: [Color(0XFF303030), Color(0XFF1a1a1a)]),
+            gradient: const LinearGradient(begin: Alignment.topLeft, colors: [Color(0XFF303030), Color(0XFF1a1a1a)]),
           ),
           child: MaterialButton(
             color: color,

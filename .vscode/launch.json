@@ -13,7 +13,8 @@
     {
       "name": "Flutter",
       "request": "launch",
-      "type": "dart"
+      "type": "dart",
+      "flutterMode": "profile"
     }
   ]
 }

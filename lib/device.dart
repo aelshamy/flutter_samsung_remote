@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:upnp/upnp.dart';
 import 'package:web_socket_channel/io.dart';
 
-import 'constants.dart';
+import 'key_codes.dart';
 
 final int kConnectionTimeout = 60;
 final kKeyDelay = 200;
@@ -79,8 +79,7 @@ class SamsungSmartTV {
 
     // log.info(`Connect to ${channel}`)
     // ws = IOWebSocketChannel.connect(channel);
-    ws = IOWebSocketChannel.connect(channel,
-        badCertificateCallback: (X509Certificate cert, String host, int port) => true);
+    ws = IOWebSocketChannel.connect(channel, badCertificateCallback: (X509Certificate cert, String host, int port) => true);
 
     ws.stream.listen((message) {
       // timer?.cancel();
@@ -183,12 +182,7 @@ class SamsungSmartTV {
         if (deviceExists == null) {
           print("Found ${device.friendlyName} on IP ${locaion.host}");
           final tv = SamsungSmartTV(host: locaion.host);
-          tv.addService({
-            "location": client.location,
-            "server": client.server,
-            "st": client.st,
-            "usn": client.usn
-          });
+          tv.addService({"location": client.location, "server": client.server, "st": client.st, "usn": client.usn});
           tvs.add(tv);
         }
       } catch (e, stack) {
@@ -197,8 +191,7 @@ class SamsungSmartTV {
       }
     }).onDone(() {
       if (tvs.isEmpty) {
-        completer.completeError(
-            "No Samsung TVs found. Make sure the UPNP protocol is enabled in your network.");
+        completer.completeError("No Samsung TVs found. Make sure the UPNP protocol is enabled in your network.");
       }
       completer.complete(tvs.first);
     });
